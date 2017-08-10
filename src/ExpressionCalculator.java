@@ -1,46 +1,41 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class ExpressionCalculator {
 
     private String[] functionArray = {"sin", "cos", "tg", "ctg", "!", "%", "^"};
-    private String[] operatorArray = {"-", "+", "/", "*", "(", ")"};
-    private final HashMap<String, Double> variables = new HashMap<String, Double>() {
-        {
-            put("pi", Math.PI);
-            put("e", Math.E);
-        }
-    };
+    private String[] operatorArray = {"-", "+", "/", "*"};
+    private String[] brackets = {"(", ")"};
+
+    private HashMap<String, Double> variables;
 
     private double result;
 
+    public ExpressionCalculator() {
+        variables = new HashMap<>();
+        variables.put("pi", Math.PI);
+        variables.put("e", Math.E);
+    }
+
+
     public double calculate(String expression) {
-        String[] tokenArray = getTokens(expression);
-        List<Double> output = new ArrayList<>();
-        Stack<String> stack = new Stack<>();
+        List<String> tokens = getTokens(expression);
 
-        for (String token : tokenArray) {
-            if (isVariable(token)) {
-                if (variables.containsKey(token)) output.add(variables.get(token));
-                else stack.push(token);
-            }
-            if (isNumber(token)) output.add(Double.parseDouble(token));
-            if (isFunction(token) || isOperator(token)) stack.push(token);
-
-        }
-
-        System.out.println("Out: " + output + " size: " + output.size() +
-                "\nStack: " + stack + " size: " + stack.size());
-
-
-        /// calculating here:
+        System.out.println(tokens);
 
         return result;
     }
 
-    private String[] getTokens(String expression) {
+    private void addSub(List<String> tokens) {
+    }
+
+    private void mulDiv(List<String> tokens) {
+    }
+
+    private void resolveFunction(List<String> tokens) {
+    }
+
+    private List<String> getTokens(String expression) {
 
         expression = expression.toLowerCase();
 
@@ -61,7 +56,11 @@ public class ExpressionCalculator {
             expression = expression.replace(operator, " " + operator + " ");
         }
 
-        return expression.split("[ ]+");
+        for (String bracket : brackets) {
+            expression = expression.replace(bracket, " " + bracket + " ");
+        }
+
+        return Arrays.stream(expression.split("[ ]+")).collect(Collectors.toList());
     }
 
     private boolean isNumber(String token) {
@@ -71,6 +70,17 @@ public class ExpressionCalculator {
         } catch (NumberFormatException e) {
             return false;
         }
+    }
+
+    private boolean isBracket(String token) {
+        boolean result = false;
+        for (String bracket : brackets) {
+            if (bracket.equals(token)) {
+                result = true;
+                break;
+            }
+        }
+        return result;
     }
 
     private boolean isOperator(String token) {
