@@ -1,38 +1,43 @@
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ExpressionCalculator {
 
-    private String[] functionArray = {"sin", "cos", "tg", "ctg", "!", "%", "^"};
-    private String[] operatorArray = {"-", "+", "/", "*"};
-    private String[] brackets = {"(", ")"};
+    private final List<String> functions = Stream.of("sin", "cos", "tg", "ctg", "!", "%", "^")
+            .collect(Collectors.toList());
 
-    private HashMap<String, Double> variables;
+    private final List<String> operators = Stream.of("-", "+", "/", "*")
+            .collect(Collectors.toList());
+
+    private final List<String> brackets = Stream.of("(", ")")
+            .collect(Collectors.toList());
+
+    private final HashMap<String, Double> constants;
+
+    private Stack<String> stack;
+    private Stack<String> out;
 
     private double result;
 
     public ExpressionCalculator() {
-        variables = new HashMap<>();
-        variables.put("pi", Math.PI);
-        variables.put("e", Math.E);
+        constants = new HashMap<>();
+        constants.put("pi", Math.PI);
+        constants.put("e", Math.E);
     }
 
 
     public double calculate(String expression) {
-        List<String> tokens = getTokens(expression);
+        stack = new Stack<>();
+        out = new Stack<>();
 
-        System.out.println(tokens);
+        toRPN(expression);
+        System.out.println("Out: " + out);
+        System.out.println("Stack: " + stack);
+
+
 
         return result;
-    }
-
-    private void addSub(List<String> tokens) {
-    }
-
-    private void mulDiv(List<String> tokens) {
-    }
-
-    private void resolveFunction(List<String> tokens) {
     }
 
     private List<String> getTokens(String expression) {
@@ -48,11 +53,11 @@ public class ExpressionCalculator {
                 .replace("(-", "(0-")
                 .replace("(+", "(0+");
 
-        for (String function : functionArray) {
+        for (String function : functions) {
             expression = expression.replace(function, " " + function + " ");
         }
 
-        for (String operator : operatorArray) {
+        for (String operator : operators) {
             expression = expression.replace(operator, " " + operator + " ");
         }
 
@@ -61,6 +66,35 @@ public class ExpressionCalculator {
         }
 
         return Arrays.stream(expression.split("[ ]+")).collect(Collectors.toList());
+    }
+
+    private void toRPN(String expression) {
+
+        //  !!! >>> SORTING MAGIC HERE: <<< !!! \\\
+
+        for (String token : getTokens(expression)) {
+            if (isConstant(token)) token = String.valueOf(constants.get(token));
+            if (isNumber(token)) out.push(token);
+            if (isFunction(token)) stack.push(token);
+            if (isOpenBracket(token)) stack.push(token);
+            if (isCloseBracket(token)) {
+                while (!stack.empty() && !isOpenBracket(stack.peek())) {
+                    out.push(stack.pop());
+                }
+                stack.pop();
+            }
+            if (isOperator(token)) {
+                while (!stack.empty() && operationPriority(token) <= operationPriority(stack.peek())) {
+                    out.push(stack.pop());
+                }
+                stack.push(token);
+            }
+        }
+        while (!stack.empty()) out.push(stack.pop());
+    }
+
+    private boolean isConstant(String token) {
+        return constants.containsKey(token);
     }
 
     private boolean isNumber(String token) {
@@ -72,40 +106,27 @@ public class ExpressionCalculator {
         }
     }
 
-    private boolean isBracket(String token) {
-        boolean result = false;
-        for (String bracket : brackets) {
-            if (bracket.equals(token)) {
-                result = true;
-                break;
-            }
-        }
-        return result;
+    private boolean isFunction(String token) {
+        return functions.contains(token);
+    }
+
+    private boolean isOpenBracket(String token) {
+        return token.equals("(");
+    }
+
+    private boolean isCloseBracket(String token) {
+        return token.equals(")");
     }
 
     private boolean isOperator(String token) {
-        boolean result = false;
-        for (String operator : operatorArray) {
-            if (operator.equals(token)) {
-                result = true;
-                break;
-            }
-        }
-        return result;
+        return operators.contains(token);
     }
 
-    private boolean isFunction(String token) {
-        boolean result = false;
-        for (String function : functionArray) {
-            if (function.equals(token)) {
-                result = true;
-                break;
-            }
-        }
-        return result;
-    }
-
-    private boolean isVariable(String token) {
-        return !isFunction(token) && token.matches("[a-z]+");
+    private int operationPriority(String token) {
+        int priority = -1;
+        if (token.equals("+") || token.equals("-")) priority = 0;
+        if (token.equals("*") || token.equals("/")) priority = 1;
+        if (isFunction(token)) priority = 3;
+        return priority;
     }
 }
