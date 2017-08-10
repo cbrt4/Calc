@@ -4,10 +4,10 @@ import java.util.stream.Stream;
 
 public class ExpressionCalculator {
 
-    private final List<String> functions = Stream.of("sin", "cos", "tg", "ctg", "!", "%", "^")
+    private final List<String> functions = Stream.of("sin", "cos", "tan", "!")
             .collect(Collectors.toList());
 
-    private final List<String> operators = Stream.of("-", "+", "/", "*")
+    private final List<String> operators = Stream.of("-", "+", "/", "*", "%", "^")
             .collect(Collectors.toList());
 
     private final List<String> brackets = Stream.of("(", ")")
@@ -26,18 +26,67 @@ public class ExpressionCalculator {
         constants.put("e", Math.E);
     }
 
-
     public double calculate(String expression) {
         stack = new Stack<>();
         out = new Stack<>();
-
         toRPN(expression);
-        System.out.println("Out: " + out);
-        System.out.println("Stack: " + stack);
 
+        //  !!! >>> CALCULATING MAGIC HERE: <<< !!! \\\
 
+        for (String token : out) {
+            if (isNumber(token)) stack.push(token);
+            if (isOperator(token)) calculateAction(token);
+            if (isFunction(token)) calculateFunction(token);
+        }
+
+        result = Double.parseDouble(stack.peek());
+
+        System.out.println("\nExpression: " + expression);
+        System.out.println("\nOut:        " + out);
+        System.out.println("\nStack:      " + stack);
+        System.out.println("\nResult:     " + result);
 
         return result;
+    }
+
+    private void calculateAction(String token) {
+        double arg2 = Double.parseDouble(stack.pop());
+        double arg1 = Double.parseDouble(stack.pop());
+        switch (token) {
+            case "-":
+                stack.push(String.valueOf(arg1 - arg2));
+                break;
+            case "+":
+                stack.push(String.valueOf(arg1 + arg2));
+                break;
+            case "/":
+                stack.push(String.valueOf(arg1 / arg2));
+                break;
+            case "*":
+                stack.push(String.valueOf(arg1 * arg2));
+                break;
+            case "%":
+                stack.push(String.valueOf(arg1 % arg2));
+                break;
+            case "^":
+                stack.push(String.valueOf(Math.pow(arg1, arg2)));
+                break;
+        }
+    }
+
+    private void calculateFunction(String token) {
+        double arg = Double.parseDouble(stack.pop());
+        switch (token) {
+            case "sin":
+                stack.push(String.valueOf(Math.sin(arg)));
+                break;
+            case "cos":
+                stack.push(String.valueOf(Math.cos(arg)));
+                break;
+            case "tan":
+                stack.push(String.valueOf(Math.tan(arg)));
+                break;
+        }
     }
 
     private List<String> getTokens(String expression) {
@@ -125,8 +174,8 @@ public class ExpressionCalculator {
     private int operationPriority(String token) {
         int priority = -1;
         if (token.equals("+") || token.equals("-")) priority = 0;
-        if (token.equals("*") || token.equals("/")) priority = 1;
-        if (isFunction(token)) priority = 3;
+        if (token.equals("*") || token.equals("/") || token.equals("%")) priority = 1;
+        if (isFunction(token) || token.equals("^")) priority = 2;
         return priority;
     }
 }
