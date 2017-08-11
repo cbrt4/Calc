@@ -26,16 +26,15 @@ public class ExpressionCalculator {
 
     private List<String> getTokens(String expression) {
 
-        expression = expression.toLowerCase();
-
-        if (expression.charAt(0) == '-' || expression.charAt(0) == '+')
-            expression = "0" + expression;
-
         expression = expression
+                .toLowerCase()
                 .replace(",", ".")
                 .replaceAll("['`]|[ ]+", "")
                 .replace("(-", "(0-")
                 .replace("(+", "(0+");
+
+        if (expression.startsWith("-") || expression.startsWith("+"))
+            expression = "0" + expression;
 
         for (String function : functions) {
             expression = expression.replace(function, " " + function + " ");
