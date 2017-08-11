@@ -4,10 +4,10 @@ import java.util.stream.Stream;
 
 public class ExpressionCalculator {
 
-    private final List<String> functions = Stream.of("sin", "cos", "tan", "cot", "!")
+    private final List<String> functions = Stream.of("sin", "cos", "tan", "cot", "!", "^", "log", "ln", "lg", "exp", "abs", "sqrt", "cbrt", "root")
             .collect(Collectors.toList());
 
-    private final List<String> operators = Stream.of("-", "+", "/", "*", "^")
+    private final List<String> operators = Stream.of("-", "+", "/", "*", "%")
             .collect(Collectors.toList());
 
     private final List<String> brackets = Stream.of("(", ")")
@@ -82,8 +82,7 @@ public class ExpressionCalculator {
      * Когда входная строка закончилась, выталкиваем все символы из стека в
      * выходную строку. В стеке должны были остаться только символы операторов;
      * если это не так, значит в выражении не согласованы скобки.
-     * */
-
+     */
     private void toRPN(String expression) {
 
         for (String token : getTokens(expression)) {
@@ -110,18 +109,21 @@ public class ExpressionCalculator {
     /**
      * Автоматизация вычисления выражений в обратной польской нотации
      * основана на использовании стека.
+     *
      * Алгоритм вычисления для стековой машины элементарен:
+     *
      * 1.Обработка входного символа
      * * Если на вход подан операнд, он помещается на вершину стека.
      * * Если на вход подан знак операции, то соответствующая операция
      * выполняется над требуемым количеством значений, извлечённых из
      * стека, взятых в порядке добавления. Результат выполненной операции
      * кладётся на вершину стека.
+     *
      * 2.Если входной набор символов обработан не полностью, перейти к шагу 1.
+     *
      * 3.После полной обработки входного набора символов результат вычисления
      * выражения лежит на вершине стека.
      */
-
     public double calculate(String expression) {
         stack = new Stack<>();
         out = new Stack<>();
@@ -132,6 +134,7 @@ public class ExpressionCalculator {
             if (isOperator(token)) calculateAction(token);
             if (isFunction(token)) calculateFunction(token);
         }
+
         try {
             return Double.parseDouble(stack.pop());
         } catch (EmptyStackException e) {
@@ -159,9 +162,6 @@ public class ExpressionCalculator {
                 case "%":
                     stack.push(String.valueOf(arg1 % arg2));
                     break;
-                case "^":
-                    stack.push(String.valueOf(Math.pow(arg1, arg2)));
-                    break;
             }
         } catch (EmptyStackException e) {
             stack.push(String.valueOf(.0/.0));
@@ -187,6 +187,36 @@ public class ExpressionCalculator {
                 case "!":
                     stack.push(String.valueOf(factorial(arg)));
                     break;
+                case "^":
+                    double base = Double.parseDouble(stack.pop());
+                    stack.push(String.valueOf(Math.pow(base, arg)));
+                    break;
+                case "log":
+                    base = Double.parseDouble(stack.pop());
+                    stack.push(String.valueOf(Math.log(arg)/Math.log(base)));
+                    break;
+                case "ln":
+                    stack.push(String.valueOf(Math.log(arg)));
+                    break;
+                case "lg":
+                    stack.push(String.valueOf(Math.log10(arg)));
+                    break;
+                case "exp":
+                    stack.push(String.valueOf(Math.exp(arg)));
+                    break;
+                case "abs":
+                    stack.push(String.valueOf(Math.abs(arg)));
+                    break;
+                case "sqrt":
+                    stack.push(String.valueOf(Math.sqrt(arg)));
+                    break;
+                case "cbrt":
+                    stack.push(String.valueOf(Math.cbrt(arg)));
+                    break;
+                case "root":
+                    double root = Double.parseDouble(stack.pop());
+                    stack.push(String.valueOf(Math.pow(arg, 1/root)));
+                    break;
             }
         } catch (EmptyStackException e) {
             stack.push(String.valueOf(.0/.0));
@@ -205,7 +235,7 @@ public class ExpressionCalculator {
 
     private boolean isNumber(String token) {
         try {
-            token = String.valueOf(Double.parseDouble(token));
+            Double.parseDouble(token);
             return true;
         } catch (NumberFormatException e) {
             return false;
@@ -231,8 +261,8 @@ public class ExpressionCalculator {
     private byte operationPriority(String token) {
         byte priority = -1;
         if (token.equals("+") || token.equals("-")) priority = 0;
-        if (token.equals("*") || token.equals("/")) priority = 1;
-        if (isFunction(token) || token.equals("^")) priority = 2;
+        if (token.equals("*") || token.equals("/") || token.equals("%")) priority = 1;
+        if (isFunction(token)) priority = 2;
         return priority;
     }
 }
