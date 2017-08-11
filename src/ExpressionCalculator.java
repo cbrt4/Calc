@@ -133,52 +133,64 @@ public class ExpressionCalculator {
             if (isOperator(token)) calculateAction(token);
             if (isFunction(token)) calculateFunction(token);
         }
-        return Double.parseDouble(stack.pop());
+        try {
+            return Double.parseDouble(stack.pop());
+        } catch (EmptyStackException e) {
+            return .0/.0;
+        }
     }
 
     private void calculateAction(String token) {
-        double arg2 = Double.parseDouble(stack.pop());
-        double arg1 = Double.parseDouble(stack.pop());
-        switch (token) {
-            case "-":
-                stack.push(String.valueOf(arg1 - arg2));
-                break;
-            case "+":
-                stack.push(String.valueOf(arg1 + arg2));
-                break;
-            case "/":
-                stack.push(String.valueOf(arg1 / arg2));
-                break;
-            case "*":
-                stack.push(String.valueOf(arg1 * arg2));
-                break;
-            case "%":
-                stack.push(String.valueOf(arg1 % arg2));
-                break;
-            case "^":
-                stack.push(String.valueOf(Math.pow(arg1, arg2)));
-                break;
+        try {
+            double arg2 = Double.parseDouble(stack.pop());
+            double arg1 = Double.parseDouble(stack.pop());
+            switch (token) {
+                case "-":
+                    stack.push(String.valueOf(arg1 - arg2));
+                    break;
+                case "+":
+                    stack.push(String.valueOf(arg1 + arg2));
+                    break;
+                case "/":
+                    stack.push(String.valueOf(arg1 / arg2));
+                    break;
+                case "*":
+                    stack.push(String.valueOf(arg1 * arg2));
+                    break;
+                case "%":
+                    stack.push(String.valueOf(arg1 % arg2));
+                    break;
+                case "^":
+                    stack.push(String.valueOf(Math.pow(arg1, arg2)));
+                    break;
+            }
+        } catch (EmptyStackException e) {
+            stack.push(String.valueOf(.0/.0));
         }
     }
 
     private void calculateFunction(String token) {
-        double arg = Double.parseDouble(stack.pop());
-        switch (token) {
-            case "sin":
-                stack.push(String.valueOf(Math.sin(arg)));
-                break;
-            case "cos":
-                stack.push(String.valueOf(Math.cos(arg)));
-                break;
-            case "tan":
-                stack.push(String.valueOf(Math.sin(arg)/Math.cos(arg)));
-                break;
-            case "cot":
-                stack.push(String.valueOf(Math.cos(arg)/Math.sin(arg)));
-                break;
-            case "!":
-                stack.push(String.valueOf(factorial(arg)));
-                break;
+        try {
+            double arg = Double.parseDouble(stack.pop());
+            switch (token) {
+                case "sin":
+                    stack.push(String.valueOf(Math.sin(arg)));
+                    break;
+                case "cos":
+                    stack.push(String.valueOf(Math.cos(arg)));
+                    break;
+                case "tan":
+                    stack.push(String.valueOf(Math.sin(arg)/Math.cos(arg)));
+                    break;
+                case "cot":
+                    stack.push(String.valueOf(Math.cos(arg)/Math.sin(arg)));
+                    break;
+                case "!":
+                    stack.push(String.valueOf(factorial(arg)));
+                    break;
+            }
+        } catch (EmptyStackException e) {
+            stack.push(String.valueOf(.0/.0));
         }
     }
 
