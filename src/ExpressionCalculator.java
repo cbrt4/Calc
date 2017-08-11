@@ -171,10 +171,10 @@ public class ExpressionCalculator {
                 stack.push(String.valueOf(Math.cos(arg)));
                 break;
             case "tan":
-                stack.push(String.valueOf(Math.tan(arg)));
+                stack.push(String.valueOf(Math.sin(arg)/Math.cos(arg)));
                 break;
             case "cot":
-                stack.push(String.valueOf(1/Math.tan(arg)));
+                stack.push(String.valueOf(Math.cos(arg)/Math.sin(arg)));
                 break;
             case "!":
                 stack.push(String.valueOf(factorial(arg)));
@@ -194,7 +194,7 @@ public class ExpressionCalculator {
 
     private boolean isNumber(String token) {
         try {
-            Double.parseDouble(token);
+            token = String.valueOf(Double.parseDouble(token));
             return true;
         } catch (NumberFormatException e) {
             return false;
