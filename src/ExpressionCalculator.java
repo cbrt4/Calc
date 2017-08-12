@@ -265,4 +265,16 @@ public class ExpressionCalculator {
         if (isFunction(token)) priority = 2;
         return priority;
     }
+
+    public String getHelp() {
+        String help = "\nCalculator supports following functions: \n";
+        for (String operator : operators) {
+            help += operator + ", ";
+        }
+        for (String function : functions) {
+            help += function + ", ";
+        }
+        help = help.substring(0, help.length()-2) + "\n";
+        return help;
+    }
 }
