@@ -15,8 +15,7 @@ public class ExpressionCalculator {
 
     private final HashMap<String, Double> constants;
 
-    private Stack<String> stack;
-    private Stack<String> out;
+    private Stack<String> stack, out;
 
     public ExpressionCalculator() {
         constants = new HashMap<>();
@@ -94,7 +93,7 @@ public class ExpressionCalculator {
                 while (!stack.empty() && !isOpenBracket(stack.peek())) {
                     out.push(stack.pop());
                 }
-                stack.pop();
+                if (!stack.empty() && isOpenBracket(stack.peek())) stack.pop();
             }
             if (isOperator(token)) {
                 while (!stack.empty() && operationPriority(token) <= operationPriority(stack.peek())) {
@@ -144,8 +143,8 @@ public class ExpressionCalculator {
 
     private void calculateAction(String token) {
         try {
-            double arg2 = Double.parseDouble(stack.pop());
-            double arg1 = Double.parseDouble(stack.pop());
+            double arg2 = Double.parseDouble(stack.pop()),
+                    arg1 = Double.parseDouble(stack.pop());
             switch (token) {
                 case "-":
                     stack.push(String.valueOf(arg1 - arg2));
@@ -170,52 +169,52 @@ public class ExpressionCalculator {
 
     private void calculateFunction(String token) {
         try {
-            double arg = Double.parseDouble(stack.pop());
+            double arg1, arg2 = Double.parseDouble(stack.pop());
             switch (token) {
                 case "sin":
-                    stack.push(String.valueOf(Math.sin(arg)));
+                    stack.push(String.valueOf(Math.sin(arg2)));
                     break;
                 case "cos":
-                    stack.push(String.valueOf(Math.cos(arg)));
+                    stack.push(String.valueOf(Math.cos(arg2)));
                     break;
                 case "tan":
-                    stack.push(String.valueOf(Math.sin(arg)/Math.cos(arg)));
+                    stack.push(String.valueOf(Math.sin(arg2)/Math.cos(arg2)));
                     break;
                 case "cot":
-                    stack.push(String.valueOf(Math.cos(arg)/Math.sin(arg)));
+                    stack.push(String.valueOf(Math.cos(arg2)/Math.sin(arg2)));
                     break;
                 case "!":
-                    stack.push(String.valueOf(factorial(arg)));
+                    stack.push(String.valueOf(factorial(arg2)));
                     break;
                 case "^":
-                    double base = Double.parseDouble(stack.pop());
-                    stack.push(String.valueOf(Math.pow(base, arg)));
+                    arg1 = Double.parseDouble(stack.pop());
+                    stack.push(String.valueOf(Math.pow(arg1, arg2)));
                     break;
                 case "log":
-                    base = Double.parseDouble(stack.pop());
-                    stack.push(String.valueOf(Math.log(arg)/Math.log(base)));
+                    arg1 = Double.parseDouble(stack.pop());
+                    stack.push(String.valueOf(Math.log(arg2)/Math.log(arg1)));
                     break;
                 case "ln":
-                    stack.push(String.valueOf(Math.log(arg)));
+                    stack.push(String.valueOf(Math.log(arg2)));
                     break;
                 case "lg":
-                    stack.push(String.valueOf(Math.log10(arg)));
+                    stack.push(String.valueOf(Math.log10(arg2)));
                     break;
                 case "exp":
-                    stack.push(String.valueOf(Math.exp(arg)));
+                    stack.push(String.valueOf(Math.exp(arg2)));
                     break;
                 case "abs":
-                    stack.push(String.valueOf(Math.abs(arg)));
+                    stack.push(String.valueOf(Math.abs(arg2)));
                     break;
                 case "sqrt":
-                    stack.push(String.valueOf(Math.sqrt(arg)));
+                    stack.push(String.valueOf(Math.sqrt(arg2)));
                     break;
                 case "cbrt":
-                    stack.push(String.valueOf(Math.cbrt(arg)));
+                    stack.push(String.valueOf(Math.cbrt(arg2)));
                     break;
                 case "root":
-                    double root = Double.parseDouble(stack.pop());
-                    stack.push(String.valueOf(Math.pow(arg, 1/root)));
+                    arg1 = Double.parseDouble(stack.pop());
+                    stack.push(String.valueOf(Math.pow(arg2, 1/arg1)));
                     break;
             }
         } catch (EmptyStackException e) {
@@ -260,21 +259,24 @@ public class ExpressionCalculator {
 
     private byte operationPriority(String token) {
         byte priority = -1;
-        if (token.equals("+") || token.equals("-")) priority = 0;
-        if (token.equals("*") || token.equals("/") || token.equals("%")) priority = 1;
+        if (token.matches("[-+]")) priority = 0;
+        if (token.matches("[*/%]")) priority = 1;
         if (isFunction(token)) priority = 2;
         return priority;
     }
 
     public String getHelp() {
-        String help = "\nCalculator supports following functions: \n";
+        String help = "\n Calculator supports following functions:\n ";
+        int count = 0;
         for (String operator : operators) {
             help += operator + ", ";
+            count++;
         }
         for (String function : functions) {
-            help += function + ", ";
+            help += count % 10 == 0 ? function + ",\n " : function + ", ";
+            count++;
         }
-        help = help.substring(0, help.length()-2) + "\n";
+        help = help.substring(0, help.length()-2) + ".\n";
         return help;
     }
 }

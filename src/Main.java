@@ -8,19 +8,14 @@ public class Main {
         ExpressionCalculator calculator = new ExpressionCalculator();
         String consoleIn;
 
-        System.out.println("To exit type 'exit' and press Enter" +
-                "\nTo see help type 'help' and press Enter" +
-                "\nType expression here:\n");
+        System.out.println("\n  * * * / / / ConsoleCalc - - - + + + \n" +
+                "\n To see help type 'help' and press Enter" +
+                "\n To exit type 'exit' and press Enter" +
+                "\n Type expression here:\n");
         while (!(consoleIn = scanner.readLine()).equalsIgnoreCase("exit")) {
-            if (consoleIn.equals(""))
-                System.out.println("Can't calculate empty expression" +
-                        "\nType expression here:\n");
-            if (consoleIn.equalsIgnoreCase("help"))
-                System.out.println(calculator.getHelp());
-            else
-                System.out.println("\n" +
-                        consoleIn + " = " + calculator.calculate(consoleIn) +
-                        "\n");
+            System.out.println(consoleIn.equalsIgnoreCase("help") ?
+                    calculator.getHelp() : " = " + calculator.calculate(consoleIn) +
+                    "\n");
         }
     }
 }
