@@ -223,8 +223,9 @@ public class ExpressionCalculator {
     }
 
     private double factorial(double arg) {
+        if (arg%1 != 0) return .0/.0;
         double result = 1;
-        for (int i = 1; i <= arg; i++) result *= i;
+        for (int i = (int) arg; i > 0; i--) result *= i;
         return result;
     }
 
