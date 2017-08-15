@@ -96,7 +96,7 @@ public class ExpressionCalculator {
                 if (!stack.empty() && isOpenBracket(stack.peek())) stack.pop();
             }
             if (isOperator(token)) {
-                while (!stack.empty() && operationPriority(token) <= operationPriority(stack.peek())) {
+                while (!stack.empty() && operationPriority(token) < operationPriority(stack.peek())) {
                     out.push(stack.pop());
                 }
                 stack.push(token);
