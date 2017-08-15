@@ -109,7 +109,7 @@ public class ExpressionCalculator {
      * Автоматизация вычисления выражений в обратной польской нотации
      * основана на использовании стека.
      *
-     * Алгоритм вычисления для стековой машины элементарен:
+     * Алгоритм вычисления для стековой машины:
      *
      * 1.Обработка входного символа
      * * Если на вход подан операнд, он помещается на вершину стека.
@@ -225,7 +225,7 @@ public class ExpressionCalculator {
     private double factorial(double arg) {
         if (arg%1 != 0) return .0/.0;
         double result = 1;
-        for (int i = (int) arg; i > 0; i--) result *= i;
+        for (int i = (int) arg; i > 1; i--) result *= i;
         return result;
     }
 
@@ -259,8 +259,7 @@ public class ExpressionCalculator {
     }
 
     private byte operationPriority(String token) {
-        byte priority = -1;
-        if (token.matches("[-+]")) priority = 0;
+        byte priority = 0;
         if (token.matches("[*/%]")) priority = 1;
         if (isFunction(token)) priority = 2;
         return priority;
