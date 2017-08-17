@@ -4,10 +4,10 @@ import java.util.stream.Stream;
 
 public class ExpressionCalculator {
 
-    private final List<String> functions = Stream.of("sin", "cos", "tan", "cot", "!", "^", "log", "ln", "lg", "exp", "abs", "sqrt", "cbrt", "root")
+    private final List<String> functions = Stream.of("sin", "cos", "tan", "cot", "!", "^", "%", "log", "ln", "lg", "exp", "abs", "sqrt", "cbrt", "root")
             .collect(Collectors.toList());
 
-    private final List<String> operators = Stream.of("-", "+", "/", "*", "%")
+    private final List<String> operators = Stream.of("-", "+", "/", "*")
             .collect(Collectors.toList());
 
     private final List<String> brackets = Stream.of("(", ")")
@@ -46,7 +46,7 @@ public class ExpressionCalculator {
         for (String bracket : brackets) {
             expression = expression.replace(bracket, " " + bracket + " ");
         }
-        return Arrays.stream(expression.split("[ ]+")).collect(Collectors.toList());
+        return Arrays.stream(expression.trim().split("[ ]+")).collect(Collectors.toList());
     }
 
     /**
@@ -96,7 +96,7 @@ public class ExpressionCalculator {
                 if (!stack.empty() && isOpenBracket(stack.peek())) stack.pop();
             }
             if (isOperator(token)) {
-                while (!stack.empty() && operationPriority(token) < operationPriority(stack.peek())) {
+                while (!stack.empty() && operationPriority(token) <= operationPriority(stack.peek())) {
                     out.push(stack.pop());
                 }
                 stack.push(token);
@@ -158,9 +158,6 @@ public class ExpressionCalculator {
                 case "*":
                     stack.push(String.valueOf(arg1 * arg2));
                     break;
-                case "%":
-                    stack.push(String.valueOf(arg1 % arg2));
-                    break;
             }
         } catch (EmptyStackException e) {
             stack.push(String.valueOf(.0/.0));
@@ -189,6 +186,10 @@ public class ExpressionCalculator {
                 case "^":
                     arg1 = Double.parseDouble(stack.pop());
                     stack.push(String.valueOf(Math.pow(arg1, arg2)));
+                    break;
+                case "%":
+                    arg1 = Double.parseDouble(stack.pop());
+                    stack.push(String.valueOf(arg1 % arg2));
                     break;
                 case "log":
                     arg1 = Double.parseDouble(stack.pop());
@@ -259,8 +260,9 @@ public class ExpressionCalculator {
     }
 
     private byte operationPriority(String token) {
-        byte priority = 0;
-        if (token.matches("[*/%]")) priority = 1;
+        byte priority = -1;
+        if (token.matches("[-+]")) priority = 0;
+        if (token.matches("[*/]")) priority = 1;
         if (isFunction(token)) priority = 2;
         return priority;
     }
