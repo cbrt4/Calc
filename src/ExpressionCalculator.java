@@ -51,24 +51,24 @@ public class ExpressionCalculator {
 
     /**
      * Алгоритм toRPN:
-     *
+     * <p>
      * Пока есть ещё символы для чтения:
-     *
+     * <p>
      * Читаем очередной символ.
-     *
+     * <p>
      * Если символ является числом, добавляем его к выходной строке.
-     *
+     * <p>
      * Если символ является символом функции, помещаем его в стек.
-     *
+     * <p>
      * Если символ является открывающей скобкой, помещаем его в стек.
-     *
+     * <p>
      * Если символ является закрывающей скобкой:
      * До тех пор, пока верхним элементом стека не станет открывающая скобка,
      * выталкиваем элементы из стека в выходную строку. При этом открывающая
      * скобка удаляется из стека, но в выходную строку не добавляется. Если
      * стек закончился раньше, чем мы встретили открывающую скобку, это означает,
      * что в выражении либо неверно поставлен разделитель, либо не согласованы скобки.
-     *
+     * <p>
      * Если символ является оператором о1, тогда:
      * 1) пока…
      * … (если оператор o1 право-ассоциированный) приоритет o1 меньше приоритета
@@ -77,7 +77,7 @@ public class ExpressionCalculator {
      * o1 меньше либо равен приоритету оператора, находящегося на вершине стека…
      * … выталкиваем верхний элемент стека в выходную строку;
      * 2) помещаем оператор o1 в стек.
-     *
+     * <p>
      * Когда входная строка закончилась, выталкиваем все символы из стека в
      * выходную строку. В стеке должны были остаться только символы операторов;
      * если это не так, значит в выражении не согласованы скобки.
@@ -108,18 +108,18 @@ public class ExpressionCalculator {
     /**
      * Автоматизация вычисления выражений в обратной польской нотации
      * основана на использовании стека.
-     *
+     * <p>
      * Алгоритм вычисления для стековой машины:
-     *
+     * <p>
      * 1.Обработка входного символа
      * * Если на вход подан операнд, он помещается на вершину стека.
      * * Если на вход подан знак операции, то соответствующая операция
      * выполняется над требуемым количеством значений, извлечённых из
      * стека, взятых в порядке добавления. Результат выполненной операции
      * кладётся на вершину стека.
-     *
+     * <p>
      * 2.Если входной набор символов обработан не полностью, перейти к шагу 1.
-     *
+     * <p>
      * 3.После полной обработки входного набора символов результат вычисления
      * выражения лежит на вершине стека.
      */
@@ -133,12 +133,7 @@ public class ExpressionCalculator {
             if (isOperator(token)) calculateAction(token);
             if (isFunction(token)) calculateFunction(token);
         }
-
-        try {
-            return Double.parseDouble(stack.pop());
-        } catch (EmptyStackException e) {
-            return .0/.0;
-        }
+        return stack.size() == 1 ? Double.parseDouble(stack.pop()) : .0 / .0;
     }
 
     private void calculateAction(String token) {
@@ -160,7 +155,7 @@ public class ExpressionCalculator {
                     break;
             }
         } catch (EmptyStackException e) {
-            stack.push(String.valueOf(.0/.0));
+            stack.push(String.valueOf(.0 / .0));
         }
     }
 
@@ -175,10 +170,10 @@ public class ExpressionCalculator {
                     stack.push(String.valueOf(Math.cos(arg2)));
                     break;
                 case "tan":
-                    stack.push(String.valueOf(Math.sin(arg2)/Math.cos(arg2)));
+                    stack.push(String.valueOf(Math.sin(arg2) / Math.cos(arg2)));
                     break;
                 case "cot":
-                    stack.push(String.valueOf(Math.cos(arg2)/Math.sin(arg2)));
+                    stack.push(String.valueOf(Math.cos(arg2) / Math.sin(arg2)));
                     break;
                 case "!":
                     stack.push(String.valueOf(factorial(arg2)));
@@ -193,7 +188,7 @@ public class ExpressionCalculator {
                     break;
                 case "log":
                     arg1 = Double.parseDouble(stack.pop());
-                    stack.push(String.valueOf(Math.log(arg2)/Math.log(arg1)));
+                    stack.push(String.valueOf(Math.log(arg2) / Math.log(arg1)));
                     break;
                 case "ln":
                     stack.push(String.valueOf(Math.log(arg2)));
@@ -215,16 +210,16 @@ public class ExpressionCalculator {
                     break;
                 case "root":
                     arg1 = Double.parseDouble(stack.pop());
-                    stack.push(String.valueOf(Math.pow(arg2, 1/arg1)));
+                    stack.push(String.valueOf(Math.pow(arg2, 1 / arg1)));
                     break;
             }
         } catch (EmptyStackException e) {
-            stack.push(String.valueOf(.0/.0));
+            stack.push(String.valueOf(.0 / .0));
         }
     }
 
     private double factorial(double arg) {
-        if (arg%1 != 0) return .0/.0;
+        if (arg % 1 != 0) return .0 / .0;
         double result = 1;
         for (int i = (int) arg; i > 1; i--) result *= i;
         return result;
@@ -278,7 +273,7 @@ public class ExpressionCalculator {
             help += count % 10 == 0 ? function + ",\n " : function + ", ";
             count++;
         }
-        help = help.substring(0, help.length()-2) + ".\n";
+        help = help.substring(0, help.length() - 2) + ".\n";
         return help;
     }
 }
