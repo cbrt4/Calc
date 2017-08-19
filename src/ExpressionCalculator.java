@@ -7,7 +7,7 @@ public class ExpressionCalculator {
     private final List<String> functions = Stream.of("sin", "cos", "tan", "cot", "!", "^", "%", "log", "ln", "lg", "exp", "abs", "sqrt", "cbrt", "root")
             .collect(Collectors.toList());
 
-    private final List<String> operators = Stream.of("-", "+", "/", "*")
+    private final List<String> operators = Stream.of("-", "+", "/", "*", UNARY)
             .collect(Collectors.toList());
 
     private final List<String> brackets = Stream.of("(", ")")
@@ -16,6 +16,8 @@ public class ExpressionCalculator {
     private final HashMap<String, Double> constants;
 
     private Stack<String> stack, out;
+
+    private static final String UNARY = "un";
 
     public ExpressionCalculator() {
         constants = new HashMap<>();
@@ -28,12 +30,8 @@ public class ExpressionCalculator {
         expression = expression
                 .toLowerCase()
                 .replace(",", ".")
-                .replaceAll("['`]|[ ]+", "")
-                .replace("(-", "(0-")
-                .replace("(+", "(0+");
-
-        if (expression.startsWith("-") || expression.startsWith("+"))
-            expression = "0" + expression;
+                .replace("|", " | ")
+                .replaceAll("['`]", "");
 
         for (String function : functions) {
             expression = expression.replace(function, " " + function + " ");
@@ -46,7 +44,31 @@ public class ExpressionCalculator {
         for (String bracket : brackets) {
             expression = expression.replace(bracket, " " + bracket + " ");
         }
-        return Arrays.stream(expression.trim().split("[ ]+")).collect(Collectors.toList());
+
+        for (Map.Entry<String, Double> entry : constants.entrySet()) {
+            expression = expression.replace(entry.getKey(), " " + entry.getKey() + " ");
+        }
+
+        List<String> tokens = new ArrayList<>();
+        String previous = " ";
+
+        for (String token : expression.split("[ ]+")) {
+            if (isNumber(previous) && (isOpenBracket(token) || isNumber(token) || isConstant(token) || isFunction(token)) ||
+                    isConstant(previous) && (isOpenBracket(token) || isNumber(token) || isConstant(token) || isFunction(token)) ||
+                    isCloseBracket(previous) && (isOpenBracket(token) || isConstant(token) || isNumber(token)  || isFunction(token))) {
+                tokens.add("*");
+                tokens.add(token);
+            } else if (token.equals("-") && !isNumber(previous) && !isConstant(previous)) {
+                tokens.add("-1");
+                tokens.add(UNARY);
+            } else if (token.equals("+") && !isNumber(previous) && !isConstant(previous)) {
+                tokens.add("1");
+                tokens.add(UNARY);
+            }
+            else tokens.add(token);
+            previous = token;
+        }
+        return tokens;
     }
 
     /**
@@ -133,7 +155,8 @@ public class ExpressionCalculator {
             if (isOperator(token)) calculateAction(token);
             if (isFunction(token)) calculateFunction(token);
         }
-        return stack.size() == 1 ? Double.parseDouble(stack.pop()) : .0 / .0;
+        return stack.size() == 1 && isNumber(stack.peek()) ?
+                Double.parseDouble(stack.pop()) : .0 / .0;
     }
 
     private void calculateAction(String token) {
@@ -151,6 +174,9 @@ public class ExpressionCalculator {
                     stack.push(String.valueOf(arg1 / arg2));
                     break;
                 case "*":
+                    stack.push(String.valueOf(arg1 * arg2));
+                    break;
+                case UNARY:
                     stack.push(String.valueOf(arg1 * arg2));
                     break;
             }
@@ -259,6 +285,7 @@ public class ExpressionCalculator {
         if (token.matches("[-+]")) priority = 0;
         if (token.matches("[*/]")) priority = 1;
         if (isFunction(token)) priority = 2;
+        if (token.equals(UNARY)) priority = 3;
         return priority;
     }
 
@@ -269,11 +296,15 @@ public class ExpressionCalculator {
             help += operator + ", ";
             count++;
         }
+        help = help.substring(0, help.length() - 3);
         for (String function : functions) {
             help += count % 10 == 0 ? function + ",\n " : function + ", ";
             count++;
         }
-        help = help.substring(0, help.length() - 2) + ".\n";
+        help = help.substring(0, help.length() - 2) +
+                ".\n\n To separate arguments in two-argument functions " +
+                "\n (e.g. 'root' and 'log')  use '|'. For example:" +
+                "\n root10|1024 = 2\n log2|1024 = 10\n";
         return help;
     }
 }
