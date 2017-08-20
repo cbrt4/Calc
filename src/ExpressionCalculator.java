@@ -17,7 +17,7 @@ public class ExpressionCalculator {
 
     private Stack<String> stack, out;
 
-    private static final String UNARY = "un";
+    private static final String UNARY = "un", SEPARATOR = "|";
 
     public ExpressionCalculator() {
         constants = new HashMap<>();
@@ -30,7 +30,7 @@ public class ExpressionCalculator {
         expression = expression
                 .toLowerCase()
                 .replace(",", ".")
-                .replace("|", " | ")
+                .replace(SEPARATOR, " " + SEPARATOR + " ")
                 .replaceAll("['`]", "");
 
         for (String function : functions) {
@@ -46,22 +46,21 @@ public class ExpressionCalculator {
         }
 
         for (Map.Entry<String, Double> entry : constants.entrySet()) {
-            expression = expression.replace(entry.getKey(), " " + entry.getKey() + " ");
+            expression = expression.replace(entry.getKey(), " " + entry.getValue() + " ");
         }
 
         List<String> tokens = new ArrayList<>();
         String previous = " ";
 
         for (String token : expression.split("[ ]+")) {
-            if (isNumber(previous) && (isOpenBracket(token) || isNumber(token) || isConstant(token) || isFunction(token)) ||
-                    isConstant(previous) && (isOpenBracket(token) || isNumber(token) || isConstant(token) || isFunction(token)) ||
-                    isCloseBracket(previous) && (isOpenBracket(token) || isConstant(token) || isNumber(token)  || isFunction(token))) {
+            if (isNumber(previous) && (isOpenBracket(token) || isNumber(token) || isFunction(token) && !token.equals("!")) ||
+                    isCloseBracket(previous) && (isOpenBracket(token) || isNumber(token)  || isFunction(token) && !token.equals("!"))) {
                 tokens.add("*");
                 tokens.add(token);
-            } else if (token.equals("-") && !isNumber(previous) && !isConstant(previous)) {
+            } else if (token.equals("-") && !isNumber(previous) && !isCloseBracket(previous)) {
                 tokens.add("-1");
                 tokens.add(UNARY);
-            } else if (token.equals("+") && !isNumber(previous) && !isConstant(previous)) {
+            } else if (token.equals("+") && !isNumber(previous) && !isCloseBracket(previous)) {
                 tokens.add("1");
                 tokens.add(UNARY);
             }
@@ -107,7 +106,6 @@ public class ExpressionCalculator {
     private void toRPN(String expression) {
 
         for (String token : getTokens(expression)) {
-            if (isConstant(token)) token = String.valueOf(constants.get(token));
             if (isNumber(token)) out.push(token);
             if (isFunction(token)) stack.push(token);
             if (isOpenBracket(token)) stack.push(token);
@@ -152,14 +150,14 @@ public class ExpressionCalculator {
 
         for (String token : out) {
             if (isNumber(token)) stack.push(token);
-            if (isOperator(token)) calculateAction(token);
+            if (isOperator(token)) calculateOperation(token);
             if (isFunction(token)) calculateFunction(token);
         }
         return stack.size() == 1 && isNumber(stack.peek()) ?
                 Double.parseDouble(stack.pop()) : .0 / .0;
     }
 
-    private void calculateAction(String token) {
+    private void calculateOperation(String token) {
         try {
             double arg2 = Double.parseDouble(stack.pop()),
                     arg1 = Double.parseDouble(stack.pop());
@@ -251,10 +249,6 @@ public class ExpressionCalculator {
         return result;
     }
 
-    private boolean isConstant(String token) {
-        return constants.containsKey(token);
-    }
-
     private boolean isNumber(String token) {
         try {
             Double.parseDouble(token);
@@ -303,8 +297,8 @@ public class ExpressionCalculator {
         }
         help = help.substring(0, help.length() - 2) +
                 ".\n\n To separate arguments in two-argument functions " +
-                "\n (e.g. 'root' and 'log')  use '|'. For example:" +
-                "\n root10|1024 = 2\n log2|1024 = 10\n";
+                "\n (e.g. 'root' and 'log')  use '" + SEPARATOR + "'. For example:" +
+                "\n root10" + SEPARATOR + "1024 = 2\n log2" + SEPARATOR + "1024 = 10\n";
         return help;
     }
 }
