@@ -53,8 +53,8 @@ public class ExpressionCalculator {
         String previous = " ";
 
         for (String token : expression.split("[ ]+")) {
-            if (isNumber(previous) && (isOpenBracket(token) || isNumber(token) || isFunction(token) && !token.equals("!")) ||
-                    isCloseBracket(previous) && (isOpenBracket(token) || isNumber(token)  || isFunction(token) && !token.equals("!"))) {
+            if (isNumber(previous) && (isOpenBracket(token) || isNumber(token) || isFunction(token) && !token.matches("[!%^]")) ||
+                    isCloseBracket(previous) && (isOpenBracket(token) || isNumber(token)  || isFunction(token) && !token.matches("[!%^]"))) {
                 tokens.add("*");
                 tokens.add(token);
             } else if (token.equals("-") && !isNumber(previous) && !isCloseBracket(previous)) {
@@ -67,6 +67,7 @@ public class ExpressionCalculator {
             else tokens.add(token);
             previous = token;
         }
+        System.out.println(tokens);
         return tokens;
     }
 
